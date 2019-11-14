@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const cors = require('cors')
 
-app.use(cors)
+app.use(cors())
 app.use(bodyParser.json())
 
 morgan.token('postString', function getString (req) {

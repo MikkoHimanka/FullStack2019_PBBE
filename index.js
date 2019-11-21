@@ -96,7 +96,7 @@ app.get('/info', (req, res) => {
         .catch(error => next(error))
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const body = req.body
 
     if (body.name === undefined || body.number === undefined) {
@@ -108,9 +108,10 @@ app.post('/api/persons', (req, res) => {
         number: body.number,
     })
 
-    person.save().then(savedPerson => {
-        res.json(savedPerson.toJSON())
-    })
+    person.save()
+        .then(savedPerson => savedPerson.toJSON())
+        .then(savedAndFormattedPerson => res.json(savedAndFormattedPerson))
+        .catch(error => next(error))
 })
 
 const unknownEndpoint = (req, res) => {
@@ -124,6 +125,8 @@ const errorHandler = (error, req, res, next) => {
 
     if (error.name === 'CastError' && error.kind === 'ObjectId') {
         return res.status(400).send( {error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        return (res.status(400).json({ error: error.message}))
     }
 
     next(error)
